@@ -15,6 +15,18 @@ df = df.drop(columns=columns_to_remove, errors='ignore')
 df = df.dropna(subset=['buy_price'])  # Target variable cannot be null
 df = df.dropna(axis=1, how='all')     # Drop empty columns
 
+floor_swap = {
+    'Bajo': '0', 
+    'Entreplanta': '0', 
+    'Semi-sÃ³tano': '-1',
+    'Semi-sótano': '-1'
+}
+
+df['floor'] = df['floor'].replace(floor_swap)
+df['floor'] = pd.to_numeric(df['floor'], errors='coerce')
+df['floor'] = df['floor'].fillna(df['floor'].median())
+df['floor'] = df['floor'].astype(int)
+
 # Impute missing numerical values using median (to avoid influence of extreme outliers)
 df['sq_mt_built'] = df['sq_mt_built'].fillna(df['sq_mt_built'].median())
 df['n_rooms'] = df['n_rooms'].fillna(df['n_rooms'].median())
@@ -41,5 +53,4 @@ for col in df.columns:
 
 print("Data shape after:", df.shape)
 
-print(df.info())
 df.to_csv('cleaned_houses_Madrid.csv', index=False)
