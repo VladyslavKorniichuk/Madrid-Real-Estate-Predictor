@@ -9,5 +9,5 @@ df = df.drop(columns=columns_to_remove, errors='ignore')
 df = pd.get_dummies(df, columns=['neighborhood_id', 'house_type_id'], dtype=int)
 
 print("Data shape after:", df.shape)
-print(df.info())
-# df.to_csv('ml_houses_Madrid_encoded.csv', index=False)
+
+df.to_csv('ml_houses_Madrid_encoded.csv', index=False)
