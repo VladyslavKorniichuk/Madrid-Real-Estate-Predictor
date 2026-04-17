@@ -7,7 +7,8 @@ print("Data shape before:", df.shape)
 columns_to_remove = [
     'id', 'title', 'subtitle', 'sq_mt_allotment', 'raw_address',
     'is_exact_address_hidden', 'portal', 'sq_mt_useful', 'door',
-    'external_reference', 'energy_certificate', 'n_floors'
+    'external_reference', 'energy_certificate', 'n_floors', 'rent_price',
+    'is_rent_price_known', 'is_buy_price_known'
 ]
 df = df.drop(columns=columns_to_remove, errors='ignore')
 
@@ -31,6 +32,11 @@ df['floor'] = df['floor'].astype(int)
 df['sq_mt_built'] = df['sq_mt_built'].fillna(df['sq_mt_built'].median())
 df['n_rooms'] = df['n_rooms'].fillna(df['n_rooms'].median())
 df['n_bathrooms'] = df['n_bathrooms'].fillna(df['n_bathrooms'].median())
+df['built_year'] = df['built_year'].fillna(df['built_year'].median())
+
+df['parking_price'] = df['parking_price'].fillna(0)
+df['street_name'] = df['street_name'].fillna('Brak')
+df['street_number'] = df['street_number'].fillna('Brak')
 
 # Standardize boolean columns into binary integer format (0/1) for modeling
 for col in df.columns:
