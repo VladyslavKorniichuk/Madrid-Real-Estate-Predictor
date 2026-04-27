@@ -1,3 +1,5 @@
+sklearn-env/
+__pycache__/
 # --- Python & Environments ---
 __pycache__/
 *.py[cod]
