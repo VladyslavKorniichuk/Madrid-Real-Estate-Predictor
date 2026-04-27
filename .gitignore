@@ -1,2 +1,37 @@
 sklearn-env/
 __pycache__/
+# --- Python & Environments ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+build/
+dist/
+
+# --- Data ---
+houses_Madrid.csv
+cleaned_houses_Madrid.csv
+*.csv
+*.xlsx
+
+# --- Machine Learning Models & Logs ---
+*.pkl
+*.h5
+*.joblib
+*.onnx
+logs/
+
+# --- Streamlit & Web App ---
+.streamlit/
+static/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- IDEs & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
