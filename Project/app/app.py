@@ -1,6 +1,9 @@
 import streamlit as st
 import joblib
 import json
+import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 scaler = joblib.load('models/scaler.pkl')
 rf_model = joblib.load('models/rf_model.pkl')
 lr_model = joblib.load('models/lr_model.pkl')
@@ -13,7 +16,7 @@ with open ('models/columns.json','r')as f:
 neighborhood_columns = [col for col in columns if col.startswith('neighborhood_id_')]
 
 house_type_columns = [col for col in columns if col.startswith('house_type_id_')]
-tab1,tab2 ,tab3= st.tabs(["Step 1","Step 2","Step 3"])
+tab1,tab2 ,tab3,tab4= st.tabs(["Step 1","Step 2","Step 3","Step 4"])
 
 with tab1:
     st.title('Wybór atrybutów')
@@ -28,7 +31,7 @@ with tab1:
     slider_n_bathrooms = st.slider('Ilość łazienek',1,16,1,1)
     st.write("Wybrano łazienek:",slider_n_bathrooms)
 
-    slider_floor = st.slider('Ilość piętr',0,10,1)
+    slider_floor = st.slider('Ilość piętr',1,10,1)
     st.write("Wybrano piętr:",slider_floor)
 
     slider_parking_price = st.slider("Cena za miejce parkingowe",0,600000,1000)
@@ -83,3 +86,70 @@ with tab3:
     neighborhood = st.selectbox('Okolice',neighborhood_columns)
     st.header("Wybór typu mieszkania")
     house_type = st.selectbox("Typ Mieszkania",house_type_columns)
+collumns_to_predict = []
+with tab4:
+    st.header("Predykcja ceny mieszkania")
+    if st.button("Stworz dataset"):
+        df = pd.DataFrame(columns=columns,data=np.zeros((1,len(columns))))
+        df['sq_mt_built'] = slider_sq_mt_built
+        df['n_rooms'] = slider_n_rooms
+        df['n_bathrooms'] = slider_n_bathrooms
+        df['floor'] = slider_floor
+        df['parking_price'] = slider_parking_price
+        df['built_year'] = slider_built_year
+        df['has_ac'] = has_ac
+        df['has_lift'] = has_lift
+        df['has_pool'] = has_pool
+        df['has_terrace'] = has_terrace
+        df['has_balcony'] = has_balcony
+        df['is_renewal_needed'] = is_renewal_needed
+        df['has_central_heating'] = has_central_heating
+        df['has_individual_heating'] = has_individual_heating
+        df['has_fitted_wardrobes'] = has_fitted_wardrobes
+        df['is_exterior'] = is_exterior
+        df['has_garden'] = has_garden
+        df['has_storage_room'] = has_storage_room
+        df['is_accessible'] = is_accessible
+        df['has_green_zones'] = has_green_zones
+        df['has_parking'] = has_parking
+        df['is_parking_included_in_price'] = is_parking_included_in_price
+        df['is_orientation_north'] = is_orientation_north
+        df['is_orientation_west'] = is_orientation_west
+        df['is_orientation_south'] = is_orientation_south
+        df['is_orientation_east'] = is_orientation_east
+        df[neighborhood] = 1
+        df[house_type] = 1
+        df['Unnamed: 0'] = 0
+        st.session_state['df'] = df
+        st.dataframe(df)
+
+    if st.button("Zrob predykcje dla wszystkich modeli"):
+        df_scaled = scaler.transform(st.session_state['df'])
+        rf_predict = rf_model.predict(df_scaled)
+        lr_predict = lr_model.predict(df_scaled)
+        ann_predict = ann_model.predict(df_scaled)
+        ann_predict_2 = ann_model_2.predict(df_scaled)
+        st.write(f"Predykcja ceny mieszkania - Model RF: {rf_predict[0]:,.0f} €")
+        st.write(f"Predykcja ceny mieszkania - Model LR: {lr_predict[0]:,.0f} €")
+        st.write(f"Predykcja ceny mieszkania - Model ANN: {ann_predict[0]:,.0f} €")
+        st.write(f"Predykcja ceny mieszkania - Model ANN 2: {ann_predict_2[0]:,.0f} €")
+        st.session_state['rf_predict'] = rf_predict[0]
+        st.session_state['lr_predict'] = lr_predict[0]
+        st.session_state["ann_predict"] = ann_predict[0]
+        st.session_state["ann_predict_2"] = ann_predict_2[0]
+
+
+    if st.button("Pokaż porównanie modeli"):
+            matrix = pd.DataFrame({
+                "Random Forest:":f"{st.session_state.get('rf_predict', 'Brak predykcji'):,.0f} €",
+                "Linear Regresion": [f"{st.session_state.get('lr_predict', 'Brak predykcji'):,.0f} €"],
+                "ANN": [f"{st.session_state.get('ann_predict', 'Brak predykcji'):,.0f} €"],
+                "ANN 2": [f"{st.session_state.get('ann_predict_2', 'Brak predykcji'):,.0f} €"]
+                })
+            st.table(matrix)
+    if st.button("Pokaz MAE error oraz RMSE error "):
+         matrix_error = pd.DataFrame({
+              "Model": ["Random Forest", "Linear Regression", "ANN", "ANN 2"],
+              "MAE Error":[110780.73, 195820.80,136807.18,157531.81],
+              "RMSE Error":[248478.64, 347034.85, 389466.64, 324476.40]})
+         st.table(matrix_error)
