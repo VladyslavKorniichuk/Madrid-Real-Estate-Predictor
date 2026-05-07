@@ -84,5 +84,5 @@ Project/
 
 ## ✍️ Authors
 
-- **Vladyslav Korniichuk** — Streamlit app, 4 additional ML models
-- **[Напарник]** — Data cleaning, initial 4 ML models
+- **Pavlo Mysiuk** — Streamlit app, 4 additional ML models
+- **Vladyslav Korniichuk** — Data cleaning, initial 4 ML models
