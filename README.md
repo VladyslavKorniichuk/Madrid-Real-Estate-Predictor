@@ -38,7 +38,24 @@ A machine learning web application that predicts apartment prices in Madrid base
 - **joblib** — model serialization
 
 ---
+## 📊 Data Visualization (Power BI)
+<img width="952" height="532" alt="image" src="https://github.com/user-attachments/assets/f11670b1-a5bc-4a8c-94ad-6c458c211e80" />
 
+<img width="948" height="538" alt="image" src="https://github.com/user-attachments/assets/6a6a49a0-7bf1-42b5-988d-2b7901f88b8d" />
+**Dashboard 1 (Power BI):**
+- **Scatter plot** — relationship between price and apartment area by house type
+- **Treemap** — distribution of apartments by renovation need (Yes/No)
+- **Bar chart** — average price by number of bathrooms
+- **Table** — top neighborhoods by minimum, maximum and average price
+- **Correlation heatmap** — correlation between key numerical features (buy_price, sq_mt_built, built_year, n_bathrooms, n_rooms). Strong positive correlation between price and area (0.78) and number of bathrooms (0.77)
+
+**Dashboard 2 (Power BI):**
+- **KPI cards** — average price, average price per m², total apartments, max/min price, average built year
+- **Bar charts** — average price by pool and lift availability
+- **Bar chart** — top 5 neighborhoods by average price
+- **Donut chart** — distribution of apartments by house type
+- **Map** — geographical location of properties in Madrid
+- **Line chart** — maximum price by built year
 ## 🚀 How to Run
 
 1. Clone the repository
@@ -84,5 +101,5 @@ Project/
 
 ## ✍️ Authors
 
-- **Pavlo Mysiuk** — Streamlit app, 4 additional ML models
+- **Pavlo Mysiuk** — Streamlit app, 4 additional ML models, Data visualization (Power BI)
 - **Vladyslav Korniichuk** — Data cleaning, initial 4 ML models
