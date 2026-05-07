@@ -161,21 +161,6 @@ with tab4:
         st.session_state['df'] = df
 
         st.dataframe(df)
-
-    # if st.button("Zrob predykcje dla wszystkich modeli"):
-    #     df_scaled = scaler.transform(st.session_state['df'])
-    #     rf_predict = rf_model.predict(df_scaled)
-    #     lr_predict = lr_model.predict(df_scaled)
-    #     ann_predict = ann_model.predict(df_scaled)
-    #     ann_predict_2 = ann_model_2.predict(df_scaled)
-    #     st.write(f"Predykcja ceny mieszkania - Model RF: {rf_predict[0]:,.0f} €")
-    #     st.write(f"Predykcja ceny mieszkania - Model LR: {lr_predict[0]:,.0f} €")
-    #     st.write(f"Predykcja ceny mieszkania - Model ANN: {ann_predict[0]:,.0f} €")
-    #     st.write(f"Predykcja ceny mieszkania - Model ANN 2: {ann_predict_2[0]:,.0f} €")
-    #     st.session_state['rf_predict'] = rf_predict[0]
-    #     st.session_state['lr_predict'] = lr_predict[0]
-    #     st.session_state["ann_predict"] = ann_predict[0]
-    #     st.session_state["ann_predict_2"] = ann_predict_2[0]
     if st.button("Pokaż porównanie modeli"):
             df_scaled = scaler.transform(st.session_state['df'])
 
