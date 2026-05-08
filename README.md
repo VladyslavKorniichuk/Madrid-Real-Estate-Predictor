@@ -79,6 +79,7 @@ streamlit run app.py
 
 ## 📁 Project Structure
 
+```text
 Madrid-Real-Estate-Predictor/
 ├── .github/
 │   └── workflows/
@@ -96,6 +97,7 @@ Madrid-Real-Estate-Predictor/
 ├── .gitignore # Defines intentionally untracked files
 ├── LICENSE # Open source license
 └── README.md # Project documentation
+```
 
 ---
 
