@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 scaler = joblib.load('models/scaler.pkl')
-rf_model = joblib.load('models/rf_model.pkl')
+rf_model = joblib.load('models/rf_model.joblib.gz')
 lr_model = joblib.load('models/lr_model.pkl')
 ann_model = joblib.load('models/ann_model.pkl')
 ann_model_2 = joblib.load('models/ann_model_2.pkl')

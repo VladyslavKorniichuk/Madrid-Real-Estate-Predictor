@@ -1,5 +1,6 @@
 sklearn-env/
 __pycache__/
+
 # --- Python & Environments ---
 *.py[cod]
 *$py.class
@@ -16,16 +17,11 @@ houses_Madrid.csv
 !cleaned_houses_Madrid.csv
 
 # --- Machine Learning Models & Logs ---
-*.pkl
-!scaler.pkl
-!random_forest_model.pkl
 *.h5
-*.joblib
 *.onnx
 logs/
 
 # --- Streamlit & Web App ---
-.streamlit/
 static/
 
 # --- Notebooks ---
