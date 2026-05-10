@@ -310,7 +310,7 @@ rf_log_rmse_2 = np.sqrt(mean_squared_error(np.expm1(y_log_test), np.expm1(y_rf_l
     st.subheader('Wnioski')
     st.write('Widzimy, że logarytmowanie celu poprawiło wyniki modelu Random Forest, zmniejszając MAE do około 109,208.08 euro i RMSE do około 245,805.12 euro, co jest najlepszym wynikiem, który udało nam się osiągnąć.')
 with tab6:
-     st.title('Predykcja z logarytmowanym modelem')
+     st.title('Predykcja z logarytmowanym modelem Random Forest')
      if st.button("Zrob predykcje z logarytmowanym modelem"):
           df_scaled = scaler.transform(st.session_state['df'])
           rf_model_log_predict = rf_model_log.predict(df_scaled)
