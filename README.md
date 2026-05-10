@@ -104,6 +104,6 @@ Madrid-Real-Estate-Predictor/
 
 ## ✍️ Authors
 
-- **Vladyslav Korniichuk** — Data cleaning, initial 4 ML models, CI pipeline , optimization model 
-- **Pavlo Mysiuk** — Streamlit app, 4 additional ML models, Data visualization (Power BI)
+- **Vladyslav Korniichuk** — Data cleaning, initial 4 ML models, CI pipeline , 
+- **Pavlo Mysiuk** — Streamlit app, 4 additional ML models, Data visualization (Power BI),optimization model
 
