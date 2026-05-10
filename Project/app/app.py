@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import joblib
 import json
@@ -5,25 +6,29 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
+
 @st.cache_resource
 def load_models_and_data():
-    scaler = joblib.load('models/scaler.pkl')
-    rf_model = joblib.load('models/rf_model.joblib.gz')
-    lr_model = joblib.load('models/lr_model.pkl')
-    ann_model = joblib.load('models/ann_model.pkl')
-    ann_model_2 = joblib.load('models/ann_model_2.pkl')
-    model_knr = joblib.load('models/model_knr.pkl')
-    model_lasso = joblib.load('models/model_lasso.pkl') 
-    model_GBR = joblib.load('models/model_GBR.pkl')
-    model_XGB = joblib.load('models/model_XGB.pkl')
+    scaler = joblib.load(os.path.join(MODELS_DIR, 'scaler.pkl'))
+    rf_model = joblib.load(os.path.join(MODELS_DIR, 'rf_model.joblib.gz'))
+    lr_model = joblib.load(os.path.join(MODELS_DIR, 'lr_model.pkl'))
+    ann_model = joblib.load(os.path.join(MODELS_DIR, 'ann_model.pkl'))
+    ann_model_2 = joblib.load(os.path.join(MODELS_DIR, 'ann_model_2.pkl'))
+    model_knr = joblib.load(os.path.join(MODELS_DIR, 'model_knr.pkl'))
+    model_lasso = joblib.load(os.path.join(MODELS_DIR, 'model_lasso.pkl')) 
+    model_GBR = joblib.load(os.path.join(MODELS_DIR, 'model_GBR.pkl'))
+    model_XGB = joblib.load(os.path.join(MODELS_DIR, 'model_XGB.pkl'))
     
-    with open('models/columns.json', 'r') as f:
+    with open(os.path.join(MODELS_DIR, 'columns.json'), 'r') as f:
         columns = json.load(f)
         
     return scaler, rf_model, lr_model, ann_model, ann_model_2, model_knr, model_lasso, model_GBR, model_XGB, columns
 
 scaler, rf_model, lr_model, ann_model, ann_model_2, model_knr, model_lasso, model_GBR, model_XGB, columns = load_models_and_data()
-# ---------------------------------------------------------------
+
+# -------------------------------------------------------------------
 
 neighborhood_columns = [col for col in columns if col.startswith('neighborhood_id_')]
 house_type_columns = [col for col in columns if col.startswith('house_type_id_')]
