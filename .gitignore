@@ -35,3 +35,6 @@ static/
 .idea/
 .DS_Store
 Thumbs.db
+data/
+labs/
+sklearn-env/
