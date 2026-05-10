@@ -6,7 +6,8 @@ A machine learning web application that predicts apartment prices in Madrid base
 
 ## 📸 Demo
 
-<img width="660" height="822" alt="image" src="https://github.com/user-attachments/assets/a3cbe126-268a-41a1-86c3-098a4911b545" />
+<img width="768" height="803" alt="image" src="https://github.com/user-attachments/assets/e30af034-e756-476a-afe3-057ee67341a3" />
+
 
 
 ---
@@ -103,6 +104,6 @@ Madrid-Real-Estate-Predictor/
 
 ## ✍️ Authors
 
-- **Vladyslav Korniichuk** — Data cleaning, initial 4 ML models, CI pipeline
+- **Vladyslav Korniichuk** — Data cleaning, initial 4 ML models, CI pipeline , optimization model 
 - **Pavlo Mysiuk** — Streamlit app, 4 additional ML models, Data visualization (Power BI)
 
