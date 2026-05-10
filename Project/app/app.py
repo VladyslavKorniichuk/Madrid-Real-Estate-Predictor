@@ -1,24 +1,35 @@
+import os
 import streamlit as st
 import joblib
 import json
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-scaler = joblib.load('models/scaler.pkl')
-rf_model = joblib.load('models/rf_model.pkl')
-lr_model = joblib.load('models/lr_model.pkl')
-ann_model = joblib.load('models/ann_model.pkl')
-ann_model_2 = joblib.load('models/ann_model_2.pkl')
-model_knr = joblib.load('models/model_knr.pkl')
-model_lasso = joblib.load('models/model_lasso.pkl') 
-model_GBR = joblib.load('models/model_GBR.pkl')
-model_XGB = joblib.load('models/model_XGB.pkl')
-rf_model_log = joblib.load('models/random_forest_logistic.pkl')
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
 
-with open ('models/columns.json','r')as f:
-    columns = json.load(f)
+@st.cache_resource
+def load_models_and_data():
+    scaler = joblib.load(os.path.join(MODELS_DIR, 'scaler.pkl'))
+    rf_model = joblib.load(os.path.join(MODELS_DIR, 'rf_model.joblib.gz'))
+    lr_model = joblib.load(os.path.join(MODELS_DIR, 'lr_model.pkl'))
+    ann_model = joblib.load(os.path.join(MODELS_DIR, 'ann_model.pkl'))
+    ann_model_2 = joblib.load(os.path.join(MODELS_DIR, 'ann_model_2.pkl'))
+    model_knr = joblib.load(os.path.join(MODELS_DIR, 'model_knr.pkl'))
+    model_lasso = joblib.load(os.path.join(MODELS_DIR, 'model_lasso.pkl')) 
+    model_GBR = joblib.load(os.path.join(MODELS_DIR, 'model_GBR.pkl'))
+    model_XGB = joblib.load(os.path.join(MODELS_DIR, 'model_XGB.pkl'))
+    rf_model_log = joblib.load(os.path.join(MODELS_DIR, 'rf_model_log.joblib.gz'))
+    
+    with open(os.path.join(MODELS_DIR, 'columns.json'), 'r') as f:
+        columns = json.load(f)
+        
+    return scaler, rf_model, lr_model, ann_model, ann_model_2, model_knr, model_lasso, model_GBR, model_XGB, rf_model_log, columns
 
+scaler, rf_model, lr_model, ann_model, ann_model_2, model_knr, model_lasso, model_GBR, model_XGB, rf_model_log, columns = load_models_and_data()
+
+# -------------------------------------------------------------------
 neighborhood_columns = [col for col in columns if col.startswith('neighborhood_id_')]
 
 house_type_columns = [col for col in columns if col.startswith('house_type_id_')]
@@ -102,61 +113,33 @@ with tab4:
     if st.button("Stworz dataset"):
         df = pd.DataFrame(columns=columns,data=np.zeros((1,len(columns))))
         df['sq_mt_built'] = slider_sq_mt_built
-
         df['n_rooms'] = slider_n_rooms
-
         df['n_bathrooms'] = slider_n_bathrooms
-
         df['floor'] = slider_floor
-
         df['parking_price'] = slider_parking_price
-
         df['built_year'] = slider_built_year
-
         df['has_ac'] = has_ac
-
         df['has_lift'] = has_lift
-
         df['has_pool'] = has_pool
-
         df['has_terrace'] = has_terrace
-
         df['has_balcony'] = has_balcony
-
         df['is_renewal_needed'] = is_renewal_needed
-
         df['has_central_heating'] = has_central_heating
-
         df['has_individual_heating'] = has_individual_heating
-
         df['has_fitted_wardrobes'] = has_fitted_wardrobes
-
         df['is_exterior'] = is_exterior
-
         df['has_garden'] = has_garden
-
         df['has_storage_room'] = has_storage_room
-
         df['is_accessible'] = is_accessible
-
         df['has_green_zones'] = has_green_zones
-
         df['has_parking'] = has_parking
-
         df['is_parking_included_in_price'] = is_parking_included_in_price
-
         df['is_orientation_north'] = is_orientation_north
-
         df['is_orientation_west'] = is_orientation_west
-
         df['is_orientation_south'] = is_orientation_south
-
         df['is_orientation_east'] = is_orientation_east
-
         df[neighborhood] = 1
-
         df[house_type] = 1
-
         df['Unnamed: 0'] = 0
 
         st.session_state['df'] = df
@@ -166,35 +149,21 @@ with tab4:
             df_scaled = scaler.transform(st.session_state['df'])
 
             rf_predict = rf_model.predict(df_scaled)
-
             lr_predict = lr_model.predict(df_scaled)
-
             ann_predict = ann_model.predict(df_scaled)
-
             ann_predict_2 = ann_model_2.predict(df_scaled)
-
             knr_predict = model_knr.predict(df_scaled)
-
             lasso_predict = model_lasso.predict(df_scaled)
-
             gbr_predict = model_GBR.predict(df_scaled)
-
             xgb_predict = model_XGB.predict(df_scaled)
 
             st.session_state['rf_predict'] = rf_predict[0]
-
             st.session_state['lr_predict'] = lr_predict[0]
-
             st.session_state["ann_predict"] = ann_predict[0]
-
             st.session_state["ann_predict_2"] = ann_predict_2[0]
-
             st.session_state['knr_predict'] = knr_predict[0]
-
             st.session_state['lasso_predict'] = lasso_predict[0]
-
             st.session_state['gbr_predict'] = gbr_predict[0]
-
             st.session_state['xgb_predict'] = xgb_predict[0]
 
             matrix1 = pd.DataFrame({
@@ -211,15 +180,15 @@ with tab4:
                 "Gradient Boosting Regressor": [f"{st.session_state.get('gbr_predict', 'Brak predykcji'):,.0f} €"],
                 "XGBoost Regressor": [f"{st.session_state.get('xgb_predict', 'Brak predykcji'):,.0f} €"]
                 })
-            st.table(matrix1,border='horizontal')
-            st.table(matrix2,border='horizontal')
+            st.table(matrix1)
+            st.table(matrix2)
     if st.button("Pokaz MAE error oraz RMSE error "):
          matrix_error = pd.DataFrame({
               "Model": ["Random Forest", "Linear Regression", "ANN", "ANN 2", "KNeighborsRegressor", "Lasso", "Gradient Boosting Regressor", "XGBoost Regressor"],
               "MAE Error":[110780.73, 195820.80,136807.18,157531.81,170705.42,195813.39,139990.02,142270.55 ],
               "RMSE Error":[248478.64, 347034.85, 389466.64, 324476.40,332617.86,347032.99,265012.33,272539.61]})
          matrix_error_sort = matrix_error.sort_values(by="MAE Error")
-         st.table(matrix_error_sort,border='horizontal')
+         st.table(matrix_error_sort)
 
 with tab5:
     st.title('Eksperyment z logarytmowaniem celu')
@@ -309,6 +278,7 @@ rf_log_rmse_2 = np.sqrt(mean_squared_error(np.expm1(y_log_test), np.expm1(y_rf_l
     
     st.subheader('Wnioski')
     st.write('Widzimy, że logarytmowanie celu poprawiło wyniki modelu Random Forest, zmniejszając MAE do około 109,208.08 euro i RMSE do około 245,805.12 euro, co jest najlepszym wynikiem, który udało nam się osiągnąć.')
+
 with tab6:
      st.title('Predykcja z logarytmowanym modelem Random Forest')
      if st.button("Zrob predykcje z logarytmowanym modelem"):
@@ -317,4 +287,4 @@ with tab6:
           matrix3 = pd.DataFrame({
               "Random Forest Logarytmowany:":[f"{np.expm1(rf_model_log_predict[0]):,.0f} €"]
               })
-          st.table(matrix3,border='horizontal')
+          st.table(matrix3)
