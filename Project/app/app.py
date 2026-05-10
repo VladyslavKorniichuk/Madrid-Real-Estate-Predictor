@@ -3,15 +3,16 @@ import joblib
 import json
 import numpy as np
 import pandas as pd
-import gc 
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 @st.cache_resource
-def load_light_models_and_data():
+def load_models_and_data():
     scaler = joblib.load('models/scaler.pkl')
+    rf_model = joblib.load('models/rf_model.joblib.gz')
     lr_model = joblib.load('models/lr_model.pkl')
     ann_model = joblib.load('models/ann_model.pkl')
     ann_model_2 = joblib.load('models/ann_model_2.pkl')
+    model_knr = joblib.load('models/model_knr.pkl')
     model_lasso = joblib.load('models/model_lasso.pkl') 
     model_GBR = joblib.load('models/model_GBR.pkl')
     model_XGB = joblib.load('models/model_XGB.pkl')
@@ -19,37 +20,37 @@ def load_light_models_and_data():
     with open('models/columns.json', 'r') as f:
         columns = json.load(f)
         
-    return scaler, lr_model, ann_model, ann_model_2, model_lasso, model_GBR, model_XGB, columns
+    return scaler, rf_model, lr_model, ann_model, ann_model_2, model_knr, model_lasso, model_GBR, model_XGB, columns
 
-scaler, lr_model, ann_model, ann_model_2, model_lasso, model_GBR, model_XGB, columns = load_light_models_and_data()
-# -------------------------------------------------------------------
+scaler, rf_model, lr_model, ann_model, ann_model_2, model_knr, model_lasso, model_GBR, model_XGB, columns = load_models_and_data()
+# ---------------------------------------------------------------
 
 neighborhood_columns = [col for col in columns if col.startswith('neighborhood_id_')]
 house_type_columns = [col for col in columns if col.startswith('house_type_id_')]
 
-tab1, tab2, tab3, tab4 = st.tabs(["Step 1", "Step 2", "Step 3", "Step 4"])
+tab1, tab2, tab3, tab4 = st.tabs(["Step 1","Step 2","Step 3","Step 4"])
 
 with tab1:
     st.title('Wybór atrybutów')
     st.header("Slisery dla wartośi numerycznych")
 
-    slider_sq_mt_built = st.slider("SQ MT Built", 13.0, 900.0, 13.0, 10.0)
-    st.write("Wybrano:", slider_sq_mt_built)
+    slider_sq_mt_built = st.slider("SQ MT Built",13.0,900.0,13.0,10.0)
+    st.write("Wybrano:",slider_sq_mt_built)
 
-    slider_n_rooms = st.slider('Ilość Pokoje', 1, 24, 1, 1)
-    st.write("Wybrano pokoje:", slider_n_rooms)
+    slider_n_rooms = st.slider('Ilość Pokoje',1,24,1,1)
+    st.write("Wybrano pokoje:",slider_n_rooms)
 
-    slider_n_bathrooms = st.slider('Ilość łazienek', 1, 16, 1, 1)
-    st.write("Wybrano łazienek:", slider_n_bathrooms)
+    slider_n_bathrooms = st.slider('Ilość łazienek',1,16,1,1)
+    st.write("Wybrano łazienek:",slider_n_bathrooms)
 
-    slider_floor = st.slider('Ilość piętr', 1, 10, 1)
-    st.write("Wybrano piętr:", slider_floor)
+    slider_floor = st.slider('Ilość piętr',1,10,1)
+    st.write("Wybrano piętr:",slider_floor)
 
-    slider_parking_price = st.slider("Cena za miejce parkingowe", 0, 600000, 1000)
-    st.write('Wybrana cena za miejsce parkingowe:', slider_parking_price)
+    slider_parking_price = st.slider("Cena za miejce parkingowe",0,600000,1000)
+    st.write('Wybrana cena za miejsce parkingowe:',slider_parking_price)
 
-    slider_built_year = st.slider('Rok budowy', 1723, 2022, 1723, 1)
-    st.write('Rok:', slider_built_year)
+    slider_built_year = st.slider('Rok budowy',1723,2022,1723,1)
+    st.write('Rok:',slider_built_year)
 
 with tab2:
     st.header('Checkboxy dla wartości True/False')
@@ -63,9 +64,9 @@ with tab2:
     has_central_heating = st.checkbox("Centralne Ogrzewanie")
     has_individual_heating = st.checkbox("Indywidualne Ogrzewanie")
     has_fitted_wardrobes = st.checkbox("Dopasowane szafy")
-    is_exterior = st.checkbox('Exterior')
+    is_exterior = st.checkbox('exterior')
     has_garden = st.checkbox("Ogród")
-    has_storage_room = st.checkbox("Pomieszczenie przechowywania") 
+    has_storage_room = st.checkbox("pomieszczenie przechowywania") 
     is_accessible = st.checkbox('Dostępny')
     has_green_zones = st.checkbox('Strefy zielone')
     has_parking = st.checkbox("Parking")
@@ -77,16 +78,16 @@ with tab2:
 
 with tab3:
     st.header("Wybór okolice")
-    neighborhood = st.selectbox('Okolice', neighborhood_columns)
+    neighborhood = st.selectbox('Okolice',neighborhood_columns)
 
     st.header("Wybór typu mieszkania")
-    house_type = st.selectbox("Typ Mieszkania", house_type_columns)
+    house_type = st.selectbox("Typ Mieszkania",house_type_columns)
 
 with tab4:
     st.header("Predykcja ceny mieszkania")
 
     if st.button("Stworz dataset"):
-        df = pd.DataFrame(columns=columns, data=np.zeros((1, len(columns))))
+        df = pd.DataFrame(columns=columns,data=np.zeros((1,len(columns))))
         df['sq_mt_built'] = slider_sq_mt_built
         df['n_rooms'] = slider_n_rooms
         df['n_bathrooms'] = slider_n_bathrooms
@@ -121,51 +122,46 @@ with tab4:
         st.dataframe(df)
 
     if st.button("Pokaż porównanie modeli"):
-        # Używamy spinnera, ponieważ ładowanie modeli z dysku zajmie chwilę
-        with st.spinner("Uwaga: Obliczanie ciężkich modeli... (może to zająć od 10 do 60 sekund)"):
-            df_scaled = scaler.transform(st.session_state['df'])
+        df_scaled = scaler.transform(st.session_state['df'])
 
-            # 1. Predykcje LEKKICH modeli (już są w RAM, więc to ułamek sekundy)
-            st.session_state['lr_predict'] = lr_model.predict(df_scaled)[0]
-            st.session_state["ann_predict"] = ann_model.predict(df_scaled)[0]
-            st.session_state["ann_predict_2"] = ann_model_2.predict(df_scaled)[0]
-            st.session_state['lasso_predict'] = model_lasso.predict(df_scaled)[0]
-            st.session_state['gbr_predict'] = model_GBR.predict(df_scaled)[0]
-            st.session_state['xgb_predict'] = model_XGB.predict(df_scaled)[0]
+        rf_predict = rf_model.predict(df_scaled)
+        lr_predict = lr_model.predict(df_scaled)
+        ann_predict = ann_model.predict(df_scaled)
+        ann_predict_2 = ann_model_2.predict(df_scaled)
+        knr_predict = model_knr.predict(df_scaled)
+        lasso_predict = model_lasso.predict(df_scaled)
+        gbr_predict = model_GBR.predict(df_scaled)
+        xgb_predict = model_XGB.predict(df_scaled)
 
-            rf_temp = joblib.load('models/rf_model.joblib.gz')
-            st.session_state['rf_predict'] = rf_temp.predict(df_scaled)[0]
-            del rf_temp  
-            gc.collect() 
-
-            knr_temp = joblib.load('models/model_knr.pkl')
-            st.session_state['knr_predict'] = knr_temp.predict(df_scaled)[0]
-            del knr_temp
-            gc.collect()
+        st.session_state['rf_predict'] = rf_predict[0]
+        st.session_state['lr_predict'] = lr_predict[0]
+        st.session_state["ann_predict"] = ann_predict[0]
+        st.session_state["ann_predict_2"] = ann_predict_2[0]
+        st.session_state['knr_predict'] = knr_predict[0]
+        st.session_state['lasso_predict'] = lasso_predict[0]
+        st.session_state['gbr_predict'] = gbr_predict[0]
+        st.session_state['xgb_predict'] = xgb_predict[0]
 
         matrix1 = pd.DataFrame({
-            "Random Forest:": f"{st.session_state.get('rf_predict', 'Brak predykcji'):,.0f} €",
+            "Random Forest:":f"{st.session_state.get('rf_predict', 'Brak predykcji'):,.0f} €",
             "Linear Regresion": [f"{st.session_state.get('lr_predict', 'Brak predykcji'):,.0f} €"],
             "ANN": [f"{st.session_state.get('ann_predict', 'Brak predykcji'):,.0f} €"],
             "ANN 2": [f"{st.session_state.get('ann_predict_2', 'Brak predykcji'):,.0f} €"],
         })
             
         matrix2 = pd.DataFrame({
-            "KNeighborsRegressor:": f"{st.session_state.get('knr_predict', 'Brak predykcji'):,.0f} €",
+            "KNeighborsRegressor:":f"{st.session_state.get('knr_predict', 'Brak predykcji'):,.0f} €",
             "Lasso": [f"{st.session_state.get('lasso_predict', 'Brak predykcji'):,.0f} €"],
             "Gradient Boosting Regressor": [f"{st.session_state.get('gbr_predict', 'Brak predykcji'):,.0f} €"],
             "XGBoost Regressor": [f"{st.session_state.get('xgb_predict', 'Brak predykcji'):,.0f} €"]
         })
-        
-        st.success("Obliczenia zakończone sukcesem!")
         st.table(matrix1)
         st.table(matrix2)
 
     if st.button("Pokaz MAE error oraz RMSE error "):
          matrix_error = pd.DataFrame({
               "Model": ["Random Forest", "Linear Regression", "ANN", "ANN 2", "KNeighborsRegressor", "Lasso", "Gradient Boosting Regressor", "XGBoost Regressor"],
-              "MAE Error": [110780.73, 195820.80, 136807.18, 157531.81, 170705.42, 195813.39, 139990.02, 142270.55],
-              "RMSE Error": [248478.64, 347034.85, 389466.64, 324476.40, 332617.86, 347032.99, 265012.33, 272539.61]
-         })
+              "MAE Error":[110780.73, 195820.80,136807.18,157531.81,170705.42,195813.39,139990.02,142270.55 ],
+              "RMSE Error":[248478.64, 347034.85, 389466.64, 324476.40,332617.86,347032.99,265012.33,272539.61]})
          matrix_error_sort = matrix_error.sort_values(by="MAE Error")
          st.table(matrix_error_sort)
