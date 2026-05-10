@@ -13,6 +13,7 @@ model_knr = joblib.load('models/model_knr.pkl')
 model_lasso = joblib.load('models/model_lasso.pkl') 
 model_GBR = joblib.load('models/model_GBR.pkl')
 model_XGB = joblib.load('models/model_XGB.pkl')
+rf_model_log = joblib.load('models/random_forest_logistic.pkl')
 
 
 with open ('models/columns.json','r')as f:
@@ -21,7 +22,7 @@ with open ('models/columns.json','r')as f:
 neighborhood_columns = [col for col in columns if col.startswith('neighborhood_id_')]
 
 house_type_columns = [col for col in columns if col.startswith('house_type_id_')]
-tab1,tab2 ,tab3,tab4= st.tabs(["Step 1","Step 2","Step 3","Step 4"])
+tab1,tab2 ,tab3,tab4,tab5,tab6= st.tabs(["Step 1","Step 2","Step 3","Step 4","Experiment","Experiment prediction"])
 
 with tab1:
     st.title('Wybór atrybutów')
@@ -219,4 +220,101 @@ with tab4:
               "RMSE Error":[248478.64, 347034.85, 389466.64, 324476.40,332617.86,347032.99,265012.33,272539.61]})
          matrix_error_sort = matrix_error.sort_values(by="MAE Error")
          st.table(matrix_error_sort,border='horizontal')
-                
+
+with tab5:
+    st.title('Eksperyment z logarytmowaniem celu')
+    st.text("Porównując poprzednie modele, można wyciągnąć wniosek, że model Random Forest ma najmniejsze MAE (110,780.73 euro), czyli średni błąd predykcji.")
+    st.text('Najpierw wykorzystałem RandomizedSearchCV oraz GridSearchCV do znalezienia najlepszych hiperparametrów dla modelu Random Forest')
+    st.text("Parametry:")
+    
+    code1 = '''parametesrs = {'n_estimators':[10,50,100,150,200],
+    'max_features':['sqrt', 'log2'],
+    'max_depth':[None, 10, 20, 30,40,50],
+    "min_samples_split":[2,5,10],
+    'min_samples_leaf':[1,2,4],
+    'bootstrap':[True, False]
+}'''
+    st.code(code1)
+    
+    st.text('Teraz inicjalizacja Random Forest Regressor z parametrami')
+    code2 = '''from sklearn.model_selection import RandomizedSearchCV
+random_search = RandomizedSearchCV(estimator=rf_model,param_distributions=parametesrs,n_iter=100,cv=5,verbose=2,random_state=42,n_jobs=1)
+random_search.fit(X_train_scaled,y_train)
+print("Best Parameters:", random_search.best_params_) '''
+    st.code(code2)
+    
+    st.text('Prognozowanie:')
+    code3 = ''' y_pred_updated = random_search.predict(X_test_scaled)'''
+    st.code(code3)
+    
+    st.text('Obliczanie MAE:' )
+    code4 = '''mae_error_new = mean_absolute_error(y_test, y_pred_updated)
+print(f"MAE error: {mae_error_new:,.2f} euro")'''
+    st.code(code4)
+    
+    st.text("Wynik:")
+    st.code('MAE error: ' + f"{118441.72:,.2f}" + ' euro')
+    
+    st.text('Mamy gorzej, więc próbujemy GridSearchCV')
+    code5 = '''from sklearn.model_selection import GridSearchCV
+grid_search = GridSearchCV(estimator=rf_model,param_grid=parametesrs,cv=5,verbose=2,n_jobs=1)
+grid_search.fit(X_train_scaled,y_train)
+print("Best Parameters:", grid_search.best_params_)'''
+    st.code(code5)
+    
+    st.text('Najlepsze parametry:')
+    code6 = ''' Best Parameters: {'bootstrap': False, 'max_depth': 50, 'max_features': 'sqrt', 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 200}'''   
+    st.code(code6)
+    
+    st.text('Prognozowanie:')
+    code7 = '''y_pred_updated_grid = grid_search.predict(X_test_scaled)''' 
+    st.code(code7)
+    
+    st.text('Obliczanie MAE:') 
+    code8 = '''mae_error_grid = mean_absolute_error(y_test, y_pred_updated_grid)'''
+    st.code(code8)
+    st.code('MAE error: ' + f"{117966.70:,.2f}" + ' euro')
+    
+    st.text('Mamy gorzej, więc próbujemy logarytmowania celu')
+    st.title('Logarytmowanie celu')
+    
+    st.text('Najpierw logarytmowanie kolumny buy price')
+    code9 = '''y_log = np.log1p(df['buy_price'])'''
+    st.code(code9)
+    
+    st.text('Następnie podział na zbiór treningowy i testowy')
+    code10 = '''X_train , X_test ,y_log_train,y_log_test = train_test_split(X,y_log,test_size=0.2,random_state=42)'''
+    st.code(code10)
+    
+    st.text("Definiowanie i trenowanie modelu Random Forest Regressor z logarytmowanym celem")
+    code11 = '''rf_log_model = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=1)
+rf_log_model.fit(X_train_scaled,y_log_train)'''
+    st.code(code11)
+    
+    st.text('Prognozowanie:')  
+    code12 = ''' y_rf_log_pred = rf_log_model.predict(X_test_scaled)'''
+    st.code(code12)
+    
+    st.text('Obliczanie MAE i RMSE dla logarytmowanego celu:')
+    code13 = '''rf_log_mae = mean_absolute_error(y_log_test, y_rf_log_pred)
+rf_log_rmse = np.sqrt(mean_squared_error(y_log_test, y_rf_log_pred))'''
+    st.code(code13)
+    st.code('MAE error: 0.15 euro \nRMSE error: 0.22 euro')
+    
+    st.text('Teraz przekształcamy prognozy z powrotem do oryginalnej skali i obliczamy MAE i RMSE w euro:')
+    code14 = '''rf_log_mae_2 = mean_absolute_error(np.expm1(y_log_test), np.expm1(y_rf_log_pred))
+rf_log_rmse_2 = np.sqrt(mean_squared_error(np.expm1(y_log_test), np.expm1(y_rf_log_pred)))'''
+    st.code(code14)
+    st.code('MAE error: 109,208.08 euro \nRMSE error: 245,805.12 euro')
+    
+    st.subheader('Wnioski')
+    st.write('Widzimy, że logarytmowanie celu poprawiło wyniki modelu Random Forest, zmniejszając MAE do około 109,208.08 euro i RMSE do około 245,805.12 euro, co jest najlepszym wynikiem, który udało nam się osiągnąć.')
+with tab6:
+     st.title('Predykcja z logarytmowanym modelem')
+     if st.button("Zrob predykcje z logarytmowanym modelem"):
+          df_scaled = scaler.transform(st.session_state['df'])
+          rf_model_log_predict = rf_model_log.predict(df_scaled)
+          matrix3 = pd.DataFrame({
+              "Random Forest Logarytmowany:":[f"{np.expm1(rf_model_log_predict[0]):,.0f} €"]
+              })
+          st.table(matrix3,border='horizontal')
